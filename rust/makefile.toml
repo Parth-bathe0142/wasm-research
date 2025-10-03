@@ -1,0 +1,15 @@
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
+[tasks.compile-singlethread]
+cwd = "D:/wasm-research/rust/singlethread"
+command = "wasm-pack"
+args = ["build", "--target", "web", "--out-dir", "../../public/singlewasm"]
+
+[tasks.compile-multithread]
+cwd = "D:/wasm-research/rust/multithread"
+command = "wasm-pack"
+args = ["build", "--target", "web", "--out-dir", "../../public/multiwasm"]
+
+[tasks.build]
+dependencies = ["compile-singlethread", "compile-multithread"]

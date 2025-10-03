@@ -1,0 +1,14 @@
+{
+  "name": "wasm-research",
+  "version": "1.0.0",
+  "main": "server/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Parth-bathe0142 <parth.bathe0142@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

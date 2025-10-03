@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <table border="1">
+            <tr>
+                <th>Test</th>
+                <th>Runs</th>
+                <th>Params</th>
+                <th>Native</th>
+                <th>Single</th>
+                <th>Multi</th>
+                <th>Action</th>
+                <th>Plot</th>
+            </tr>
+            <tr>
+                <td>Sum of 1B</td>
+                <td><input type="number" id="sum-runs" value="20" /></td>
+                <td></td>
+                <td><span id="sum-native"></span></td>
+                <td><span id="sum-single"></span></td>
+                <td><span id="sum-multi"></span></td>
+                <td>
+                    <button class="test-runner" id="sum-runner">RUN</button>
+                </td>
+                <td>
+                    <button class="test-plotter" id="sum-plotter">RUN</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Matrix multiplication</td>
+                <td><input type="number" id="matrix-runs" value="20" /></td>
+                <td><input type="number" id="matrix-params" value="200" /></td>
+                <td><span id="matrix-native"></span></td>
+                <td><span id="matrix-single"></span></td>
+                <td><span id="matrix-multi"></span></td>
+                <td>
+                    <button class="test-runner" id="matrix-runner">RUN</button>
+                </td>
+                <td>
+                    <button class="test-plotter" id="matrix-plotter">
+                        RUN
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>Image Blur</td>
+                <td><input type="number" id="image-runs" value="20" /></td>
+                <td><input type="text" id="image-params" value="200 200" /></td>
+                <td><span id="image-native"></span></td>
+                <td><span id="image-single"></span></td>
+                <td><span id="image-multi"></span></td>
+                <td>
+                    <button class="test-runner" id="image-runner">RUN</button>
+                </td>
+                <td>
+                    <button class="test-plotter" id="image-plotter">RUN</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Grep</td>
+                <td><input type="number" id="grep-runs" value="20" /></td>
+                <td><input type="text" id="grep-params" value="200 200" /></td>
+                <td><span id="grep-native"></span></td>
+                <td><span id="grep-single"></span></td>
+                <td><span id="grep-multi"></span></td>
+                <td>
+                    <button class="test-runner" id="grep-runner">RUN</button>
+                </td>
+                <td>
+                    <button class="test-plotter" id="grep-plotter">RUN</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Sort Array</td>
+                <td><input type="number" id="sort-runs" value="20" /></td>
+                <td><input type="text" id="sort-params" value="200" /></td>
+                <td><span id="sort-native"></span></td>
+                <td><span id="sort-single"></span></td>
+                <td><span id="sort-multi"></span></td>
+                <td>
+                    <button class="test-runner" id="sort-runner">RUN</button>
+                </td>
+                <td>
+                    <button class="test-plotter" id="sort-plotter">RUN</button>
+                </td>
+            </tr>
+        </table>
+
+        <div>
+            <canvas id="Chart" height="500" width="500"></canvas>
+        </div>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="index.js"></script>
+</html>
