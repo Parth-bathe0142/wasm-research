@@ -1,10 +1,14 @@
-import * as native from "./native_impl.js";
 import * as util from "./util.js";
-import { GrepRes, ImageRes, MatrixRes, SortRes, SumRes } from "./results.js";
-import { Results } from "./results.js";
-
-import singleinit, * as single from "./singlewasm/singlethread.js";
-import multiinit, * as multi from "./multiwasm/multithread.js";
+import { averages, results, Results } from "./results.js";
+import singleinit from "./singlewasm/singlethread.js";
+import multiinit, { initThreadPool } from "./multiwasm/multithread.js";
+import {
+  testSum,
+  testMatrixMult,
+  testImageBlur,
+  testGrep,
+  testSortArray,
+} from "./tests.js";
 
 const cores = navigator.hardwareConcurrency || 4;
 
@@ -12,7 +16,7 @@ async function main() {
   await singleinit();
   await multiinit();
 
-  await multi.initThreadPool(cores);
+  await initThreadPool(cores);
 }
 main();
 
@@ -59,87 +63,47 @@ for (let b of document.getElementsByClassName("test-plotter")) {
   });
 }
 
-function testSum(runs) {
-  const results = [];
-  for (let i = 0; i < runs; i++) {
-    const nat = util.run(native.sumOf1000000000);
-    const sin = util.run(single.sum_of_1_000_000_000);
-    const mul = util.run(multi.sum_of_1_000_000_000);
+document.querySelector("button#save").addEventListener("click", async (_) => {
+  const res = JSON.stringify(results);
 
-    results.push(new SumRes(nat, sin, mul));
+  const response = await fetch("/results", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: res,
+  });
+
+  if (!response.ok) {
+    alert("Error saving data");
   }
-  return results;
-}
+});
 
-function testMatrixMult(runs, s) {
-  const size = parseInt(s);
+document.querySelector("button#load").addEventListener("click", async (_) => {
+  const response = await fetch("/results");
 
-  const results = [];
-  for (let i = 0; i < runs; i++) {
-    let [mat1, mat2] = util.randomMatrices(size);
-
-    const nat = util.run(native.matrixMultiplication, mat1, mat2, size);
-    const sin = util.run(single.matrix_multiplication, mat1, mat2, size);
-    const mul = util.run(multi.matrix_multiplication, mat1, mat2, size);
-
-    results.push(new MatrixRes(nat, sin, mul, size));
-  }
-  console.log(results)
-
-  return results;
-}
-
-function testImageBlur(runs, w, h) {
-  const width = parseInt(w);
-  const height = parseInt(h);
-
-  const results = [];
-  for (let i = 0; i < runs; i++) {
-    const image = util.randomImage(width, height);
-
-    const nat = util.run(native.imageBlur, image, width, height);
-    const sin = util.run(single.image_blur, image, width, height);
-    const mul = util.run(multi.image_blur, image, width, height);
-
-    results.push(new ImageRes(nat, sin, mul, width, height));
-  }
-  console.log(results);
-
-  return results;
-}
-
-function testGrep(runs, li, le) {
-  const lines = parseInt(li);
-  const length = parseInt(le);
-  const query = "test";
-
-  const results = [];
-  for (let i = 0; i < runs; i++) {
-    const content = single.random_grep_data(lines, length, query) || "";
-
-    const nat = util.run(native.grepSearch, query, content);
-    const sin = util.run(single.grep_search, query, content);
-    const mul = util.run(multi.grep_search, query, content);
-
-    results.push(new GrepRes(nat, sin, mul, lines, length));
+  if (!response.ok) {
+    return alert("Error loading data");
   }
 
-  return results;
-}
+  const { result, average } = await response.json();
 
-function testSortArray(runs, le) {
-  const length = parseInt(le);
+  Object.assign(results, result);
+  Object.assign(averages, average);
+});
 
-  const results = [];
-  for (let i = 0; i < runs; i++) {
-    const array = Array.from(new Array(length), (_) => Math.random());
+document
+  .querySelector("button#clear-local")
+  .addEventListener("click", async (_) => {
+    Object.entries(results).forEach(([test]) => {
+      results[test] = util.getEmptyTestData();
+    });
+  });
 
-    const nat = util.run(native.sortArray, array);
-    const sin = util.run(single.sort_array, array);
-    const mul = util.run(multi.sort_array, array);
-
-    results.push(new SortRes(nat, sin, mul, length));
-  }
-
-  return results;
-}
+document
+  .querySelector("button#clear-saved")
+  .addEventListener("click", async (_) => {
+    const response = await fetch("/results", {
+      method: "DELETE",
+    });
+  });

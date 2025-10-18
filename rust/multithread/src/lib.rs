@@ -3,6 +3,11 @@ use rayon::prelude::*;
 
 pub use wasm_bindgen_rayon::init_thread_pool;
 
+#[wasm_bindgen(start)]
+fn init() {
+    console_error_panic_hook::set_once();
+}
+
 #[wasm_bindgen]
 pub fn sum_of_1_000_000_000() -> u64 {
     (0..1_000_000_000)

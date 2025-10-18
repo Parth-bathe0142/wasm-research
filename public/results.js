@@ -3,7 +3,7 @@
  * @typedef {{ native: Point[], single: Point[], multi: Point[] }} TestData
  * @type {Record<string, TestData>}
  */
-export const dataset = {
+export let results = {
   sum: {
     native: [],
     single: [],
@@ -30,6 +30,8 @@ export const dataset = {
     multi: [],
   },
 };
+
+export let averages = JSON.parse(JSON.stringify(results))
 
 export class Results {
   /**
@@ -66,9 +68,9 @@ export class Results {
     const { native, single, multi } = result;
     const param = result.param;
 
-    dataset[test].native.push({ x: param, y: native });
-    dataset[test].single.push({ x: param, y: single });
-    dataset[test].multi.push({ x: param, y: multi });
+    results[test].native.push({ x: param, y: native });
+    results[test].single.push({ x: param, y: single });
+    results[test].multi.push({ x: param, y: multi });
   }
 
   constructor(native, single, multi) {

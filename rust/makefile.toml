@@ -11,5 +11,10 @@ cwd = "D:/wasm-research/rust/multithread"
 command = "wasm-pack"
 args = ["build", "--target", "web", "--out-dir", "../../public/multiwasm"]
 
+[tasks.compile-backend]
+cwd = "D:/wasm-research/rust/backend"
+command = "wasm-pack"
+args = ["build", "--target", "nodejs", "--out-dir", "../wasm"]
+
 [tasks.build]
-dependencies = ["compile-singlethread", "compile-multithread"]
+dependencies = ["compile-singlethread", "compile-multithread", "compile-backend"]

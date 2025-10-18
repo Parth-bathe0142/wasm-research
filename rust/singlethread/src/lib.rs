@@ -1,6 +1,11 @@
 use rand::{rngs::SmallRng, Rng, RngCore, SeedableRng};
 use wasm_bindgen::prelude::*;
 
+#[wasm_bindgen(start)]
+fn init() {
+    console_error_panic_hook::set_once();
+}
+
 #[wasm_bindgen]
 pub fn random_grep_data(lines: i32, length: i32, query: String) -> String {
     let mut content = "".to_string();

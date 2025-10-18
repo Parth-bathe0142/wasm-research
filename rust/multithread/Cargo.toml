@@ -9,6 +9,7 @@ edition = "2024"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+console_error_panic_hook = "0.1.7"
 rayon = "1.11.0"
 wasm-bindgen = "0.2.101"
 wasm-bindgen-rayon = { version = "1.3.0", features = ["no-bundler"]}

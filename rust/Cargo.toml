@@ -1,5 +1,5 @@
 cargo-features = ["edition2024"]
 
 [workspace]
-members = ["multithread", "singlethread"]
+members = [ "backend","multithread", "singlethread"]
 resolver = "3"

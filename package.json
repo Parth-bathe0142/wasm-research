@@ -9,6 +9,7 @@
   "author": "Parth-bathe0142 <parth.bathe0142@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "backend": "file:rust/wasm",
     "express": "^5.1.0"
   }
 }

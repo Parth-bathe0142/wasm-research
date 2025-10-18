@@ -1,4 +1,4 @@
-import { Results, dataset } from "./results.js";
+import { averages, Results, results } from "./results.js";
 
 export function run(fn, ...args) {
   const start = performance.now();
@@ -38,8 +38,7 @@ export function plot(test, canvasId = "Chart") {
     return;
   }
 
-  const data = dataset[test];
-  console.log(data);
+  const data = averages[test];
   if (!data) {
     console.error(`No dataset found for test "${test}"`);
     return;
@@ -140,3 +139,41 @@ export function randomImage(width, height) {
 
   return image;
 }
+
+export const getEmptyResults = () => {
+  return {
+    sum: {
+      native: [],
+      single: [],
+      multi: [],
+    },
+    matrix: {
+      native: [],
+      single: [],
+      multi: [],
+    },
+    image: {
+      native: [],
+      single: [],
+      multi: [],
+    },
+    grep: {
+      native: [],
+      single: [],
+      multi: [],
+    },
+    sort: {
+      native: [],
+      single: [],
+      multi: [],
+    },
+  };
+};
+
+export const getEmptyTestData = () => {
+  return {
+    native: [],
+    single: [],
+    multi: [],
+  };
+};
