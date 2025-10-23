@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "main": "server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "keywords": [],
   "author": "Parth-bathe0142 <parth.bathe0142@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "backend": "file:rust/wasm",
+    "wasm": "file:rust/wasm",
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }

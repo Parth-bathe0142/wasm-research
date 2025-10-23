@@ -1,8 +1,9 @@
 const fs = require("fs/promises");
 const { emptyTest } = require("./util");
+const path = require("path");
 let wasm;
 (async () => {
-  wasm = await import("backend");
+  wasm = await import("wasm");
 })();
 
 /**
@@ -40,39 +41,45 @@ const results = {
 /** @type  {TestResult} */
 const averages = JSON.parse(JSON.stringify(results));
 
-async function loadResults() {
+async function loadResults(file = path.join(__dirname, "../results.json"), dest = results) {
   try {
-    const data = await fs.readFile("D:/wasm-research/results.json", "utf8");
-    const [res, avg] = JSON.parse(data);
-    Object.assign(results, res);
-    Object.assign(averages, avg);
-    return results;
+    const data = await fs.readFile(file, "utf8");
+    const res = JSON.parse(data);
+    Object.assign(dest, res);
+    
+    return res;
   } catch (error) {
     console.error("Failed to load dataset:", error);
   }
 }
 
-async function saveResults() {
-  await fs.writeFile("results.json", JSON.stringify([results, averages], null, 2));
+async function saveResults(file = path.join(__dirname, "../results.json"), source = results) {
+  await fs.writeFile(
+    file,
+    JSON.stringify(source, null, 2)
+  );
 }
 
 /**
  * @typedef {{ x: number, y: number }} Point
  * @typedef {{ native: Point[], single: Point[], multi: Point[] }} TestData
  * @param {Record<string, TestData>} result
+ * @param {Record<string, TestData>} dest
  */
-async function addToResults(result) {
+async function addToResults(result, dest = results) {
   Object.entries(result).forEach(([key, value]) => {
-    results[key].native.push(...value.native);
-    results[key].single.push(...value.single);
-    results[key].multi.push(...value.multi);
+    if (!Object.hasOwn(dest, key)) {
+      dest[key] = emptyTest()
+    }
+    
+    dest[key].native.push(...value.native);
+    dest[key].single.push(...value.single);
+    dest[key].multi.push(...value.multi);
   });
-
-  await saveResults();
 }
 
-function averageResults() {
-  const newResults = wasm.average_results(results);
+function averageResults(source = results) {
+  const newResults = wasm.average_results(source);
   return newResults;
 }
 
@@ -89,11 +96,11 @@ function clearTests(test) {
       results[key] = emptyTest();
     });
   }
-  saveResults();
 }
 
 module.exports = {
   loadResults,
+  saveResults,
   addToResults,
   averageResults,
   clearTests,

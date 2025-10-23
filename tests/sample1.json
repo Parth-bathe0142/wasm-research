@@ -1,0 +1,27 @@
+{
+  "sum": {
+    "native": [],
+    "single": [],
+    "multi": []
+  },
+  "matrix": {
+    "native": [],
+    "single": [],
+    "multi": []
+  },
+  "image": {
+    "native": [],
+    "single": [],
+    "multi": []
+  },
+  "grep": {
+    "native": [],
+    "single": [],
+    "multi": []
+  },
+  "sort": {
+    "native": [],
+    "single": [],
+    "multi": []
+  }
+}

@@ -1,6 +1,12 @@
 const express = require("express");
 const path = require("path");
-const { loadResults, saveResults, averageResults, addToResults, clearTests } = require("./store_results");
+const {
+  loadResults,
+  saveResults,
+  averageResults,
+  addToResults,
+  clearTests,
+} = require("./store_results");
 const app = express();
 
 app.use((_, res, next) => {
@@ -14,7 +20,7 @@ app.use((_, res, next) => {
 });
 
 app.use("/", express.static(path.join(__dirname, "../public")));
-app.use(express.json())
+app.use(express.json());
 
 app.get("/results", async (_, res) => {
   const results = await loadResults();
@@ -23,30 +29,32 @@ app.get("/results", async (_, res) => {
 });
 
 app.post("/results", async (req, res) => {
-  const { body } = req
-  addToResults(body)
-  
-  const results = await loadResults();
+  const { body } = req;
+  addToResults(body);
+  saveResults();
+
   const average = averageResults(results);
   res.json({ results, average });
-})
+});
 
 app.delete("/results", (_, res) => {
   try {
-    clearTests()
+    clearTests();
+    saveResults();
   } catch (e) {
-    console.error(e)
+    res.status(500).send("Error: " + e)
   }
-})
+});
 
 app.delete("/results/{test}", (req, res) => {
   try {
-    let test = req.params.id
-    clearTests(test)
+    let test = req.params.id;
+    clearTests(test);
+    saveResults();
   } catch (e) {
-    console.error(e)
+    res.status(500).send("Error: " + e)
   }
-})
+});
 
 app.use((_, res) => {
   res.status(404).send("Not found");
