@@ -25,16 +25,16 @@ app.use(express.json());
 app.get("/results", async (_, res) => {
   const results = await loadResults();
   const average = averageResults(results);
-  res.json({ result: results, average });
+  res.json({ average });
 });
 
 app.post("/results", async (req, res) => {
   const { body } = req;
   addToResults(body);
   saveResults();
-
-  const average = averageResults(results);
-  res.json({ results, average });
+  
+  const average = averageResults(body);
+  res.json({ average });
 });
 
 app.delete("/results", (_, res) => {

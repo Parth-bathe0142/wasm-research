@@ -32,19 +32,18 @@ export function testMatrixMult(runs, s) {
 
     return results;
 }
-export function testImageBlur(runs, w, h) {
-    const width = parseInt(w);
-    const height = parseInt(h);
+export function testImageBlur(runs, s) {
+    const size = parseInt(s);
 
     const results = [];
     for (let i = 0; i < runs; i++) {
-        const image = util.randomImage(width, height);
+        const image = util.randomImage(size, size);
 
-        const nat = util.run(native.imageBlur, image, width, height);
-        const sin = util.run(single.image_blur, image, width, height);
-        const mul = util.run(multi.image_blur, image, width, height);
+        const nat = util.run(native.imageBlur, image, size);
+        const sin = util.run(single.image_blur, image, size);
+        const mul = util.run(multi.image_blur, image, size);
 
-        results.push(new ImageRes(nat, sin, mul, width, height));
+        results.push(new ImageRes(nat, sin, mul,size));
     }
     console.log(results);
 

@@ -1,4 +1,4 @@
-import { averages, Results, results } from "./results.js";
+import { averages, results, Results } from "./results.js";
 
 export function run(fn, ...args) {
   const start = performance.now();
@@ -140,7 +140,7 @@ export function randomImage(width, height) {
   return image;
 }
 
-export const getEmptyResults = () => {
+export function getEmptyResults() {
   return {
     sum: {
       native: [],
@@ -168,12 +168,18 @@ export const getEmptyResults = () => {
       multi: [],
     },
   };
-};
+}
 
-export const getEmptyTestData = () => {
+export function getEmptyTestData() {
   return {
     native: [],
     single: [],
     multi: [],
   };
-};
+}
+
+export function clearResults(res = results) {
+  Object.entries(res).forEach(([test]) => {
+    res[test] = getEmptyTestData();
+  });
+}

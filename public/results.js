@@ -31,7 +31,7 @@ export let results = {
   },
 };
 
-export let averages = JSON.parse(JSON.stringify(results))
+export let averages = JSON.parse(JSON.stringify(results));
 
 export class Results {
   /**
@@ -84,6 +84,10 @@ export class SumRes extends Results {
   constructor(native, single, multi) {
     super(native, single, multi);
   }
+
+  get param() {
+    return 1;
+  }
 }
 
 export class MatrixRes extends Results {
@@ -98,14 +102,13 @@ export class MatrixRes extends Results {
 }
 
 export class ImageRes extends Results {
-  constructor(native, single, multi, width, height) {
+  constructor(native, single, multi, size) {
     super(native, single, multi);
-    this.width = width;
-    this.height = height;
+    this.size = size;
   }
 
   get param() {
-    return this.width * this.height;
+    return this.size;
   }
 }
 

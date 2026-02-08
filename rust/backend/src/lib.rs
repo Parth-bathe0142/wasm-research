@@ -1,8 +1,8 @@
+use js_sys::{Object, Reflect};
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::{from_value, to_value};
 use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
-use js_sys::{Object, Reflect};
 
 #[wasm_bindgen(start)]
 fn init() {
@@ -40,18 +40,18 @@ pub fn average_results(results: JsValue) -> Result<JsValue, serde_wasm_bindgen::
             (k, td)
         })
         .collect();
-    
+
     let js_obj = Object::new();
     for (k, v) in averages.iter() {
         let v = to_value(v).unwrap();
-        Reflect::set(&js_obj, &JsValue::from_str(&k), &v).unwrap();
+        Reflect::set(&js_obj, &JsValue::from_str(k), &v).unwrap();
     }
-    
+
     Ok(js_obj.into())
 }
 
 fn process_results(res: &[Point]) -> Vec<Point> {
-    let mut map = BTreeMap::new();
+    let mut map: BTreeMap<i32, (f64, i32)> = BTreeMap::new();
     for p in res {
         let entry = map.entry(p.x).or_insert((0.0, 0));
 
@@ -59,23 +59,19 @@ fn process_results(res: &[Point]) -> Vec<Point> {
         entry.1 += 1;
     }
 
-    let mut averages: Vec<Point> = map
-        .iter()
-        .map(|(&x, &(sum, count))| Point {
+    map.into_iter()
+        .map(|(x, (sum, count))| Point {
             x,
             y: sum / count as f64,
         })
-        .collect();
-
-    averages.sort_by(|a, b| a.x.cmp(&b.x));
-    averages
+        .collect()
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
     use wasm_bindgen_test::*;
-    
+
     #[wasm_bindgen_test]
     fn test_process_results() {
         let points = [
@@ -84,16 +80,12 @@ mod test {
             Point { x: 2, y: 3. },
             Point { x: 2, y: 4. },
         ];
-        
+
         let processed = process_results(&points);
-        
-        assert!(
-            vec![
-                Point { x: 1, y: 1.5 },
-                Point { x: 2, y: 3.5 },
-            ].iter()
+
+        assert!(vec![Point { x: 1, y: 1.5 }, Point { x: 2, y: 3.5 },]
+            .iter()
             .enumerate()
-            .all(|(i, e)| *e == processed[i])
-        );
+            .all(|(i, e)| *e == processed[i]));
     }
 }

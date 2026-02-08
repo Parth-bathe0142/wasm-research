@@ -33,14 +33,14 @@ pub fn matrix_multiplication(a: Vec<f64>, b: Vec<f64>, n: usize) -> Vec<f64> {
 }
 
 #[wasm_bindgen]
-pub fn image_blur(data: Vec<u8>, width: usize, height: usize) -> Vec<u8> {
+pub fn image_blur(data: Vec<u8>, size: usize) -> Vec<u8> {
     let kernel: [u8; 9] = [1, 2, 1, 2, 4, 2, 1, 2, 1];
 
     let mut result = vec![0u8; data.len()];
 
     result.par_iter_mut().enumerate().for_each(|(i, e)| {
-        let x = i / width;
-        let y = i % width;
+        let x = i / size;
+        let y = i % size;
 
         let mut acc = 0u8;
         let mut weight = 0u8;
@@ -51,7 +51,7 @@ pub fn image_blur(data: Vec<u8>, width: usize, height: usize) -> Vec<u8> {
             let dx = kx + x as isize;
             let dy = ky + y as isize;
 
-            if dx < 0 || dx >= height as isize || dy < 0 || dy >= width as isize {
+            if dx < 0 || dx >= size as isize || dy < 0 || dy >= size as isize {
                 continue;
             };
 
@@ -59,7 +59,7 @@ pub fn image_blur(data: Vec<u8>, width: usize, height: usize) -> Vec<u8> {
             let dy = dy as usize;
             let j = j as usize;
 
-            acc += data[dx * width + dy] * kernel[j];
+            acc += data[dx * size + dy] * kernel[j];
             weight += kernel[j];
         }
 

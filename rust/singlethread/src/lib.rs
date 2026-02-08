@@ -16,7 +16,7 @@ pub fn random_grep_data(lines: i32, length: i32, query: String) -> String {
         srng.fill_bytes(bytes.as_mut_slice());
 
         let mut str = bytes
-            .iter_mut()
+            .iter()
             .map(|x| char::from(b'a' + *x % 26u8))
             .collect::<String>();
 
@@ -55,16 +55,16 @@ pub fn matrix_multiplication(a: &[f64], b: &[f64], n: usize) -> Vec<f64> {
 }
 
 #[wasm_bindgen]
-pub fn image_blur(data: &[u8], width: usize, height: usize) -> Vec<u8> {
+pub fn image_blur(data: &[u8], size: usize) -> Vec<u8> {
     let kernel: [u8; 9] = [1, 2, 1, 2, 4, 2, 1, 2, 1];
 
     let mut result = vec![0u8; data.len()];
 
     result.iter_mut().enumerate().for_each(|(i, e)| {
-        let x = i / width;
-        let y = i % width;
+        let x = i / size;
+        let y = i % size;
 
-        let mut acc = 0u8;
+        let mut acc = 0u16;
         let mut weight = 0u8;
         for j in 0..9 {
             let kx = (j / 3) - 1;
@@ -73,7 +73,7 @@ pub fn image_blur(data: &[u8], width: usize, height: usize) -> Vec<u8> {
             let dx = kx + x as isize;
             let dy = ky + y as isize;
 
-            if dx < 0 || dx >= height as isize || dy < 0 || dy >= width as isize {
+            if dx < 0 || dx >= size as isize || dy < 0 || dy >= size as isize {
                 continue;
             };
 
@@ -81,11 +81,11 @@ pub fn image_blur(data: &[u8], width: usize, height: usize) -> Vec<u8> {
             let dy = dy as usize;
             let j = j as usize;
 
-            acc += data[dx * width + dy] * kernel[j];
+            acc += data[dx * size + dy] as u16 * kernel[j] as u16;
             weight += kernel[j];
         }
 
-        *e = acc / weight;
+        *e = (acc / weight as u16) as u8;
     });
 
     result

@@ -3,3 +3,5 @@ package-lock.json
 public/singlewasm
 public/multiwasm
 .idea
+
+Result.json

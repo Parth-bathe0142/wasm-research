@@ -30,17 +30,17 @@ export function matrixMultiplication(a, b, n) {
 /**
  *
  * @param {Uint8ClampedArray} data
- * @param {number} width
- * @param {number} height
+ * @param {number} size
+ * @param {number} size
  */
-export function imageBlur(data, width, height) {
+export function imageBlur(data, size) {
   let kernel = [1, 2, 1, 2, 4, 2, 1, 2, 1];
 
   const result = new Uint8ClampedArray(data.length);
 
   for (let i = 0; i < data.length; i++) {
-    const x = i / width;
-    const y = i % width;
+    const x = i / size;
+    const y = i % size;
 
     let acc = 0;
     let weight = 0;
@@ -51,11 +51,11 @@ export function imageBlur(data, width, height) {
       const dx = kx + x;
       const dy = ky + y;
 
-      if (dx < 0 || dx >= height || dy < 0 || dy >= width) {
+      if (dx < 0 || dx >= size || dy < 0 || dy >= size) {
         continue;
       }
 
-      acc += data[dx * width + dy] * kernel[j];
+      acc += data[dx * size + dy] * kernel[j];
       weight += kernel[j];
     }
 
