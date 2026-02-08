@@ -1,5 +1,4 @@
 import * as util from "./util.js";
-import { averages, results, Results } from "./results.js";
 import singleinit from "./singlewasm/singlethread.js";
 import multiinit, { initThreadPool } from "./multiwasm/multithread.js";
 import {
@@ -25,8 +24,7 @@ for (let b of document.getElementsByClassName("test-runner")) {
 	const getVal = (id) => document.querySelector(`#${id}`)?.value;
 	const test = b.id.split("-")[0];
 
-	console.log("added " + test);
-	b.addEventListener("click", (_) => {
+	b.addEventListener("click", async (_) => {
 		console.log("running " + test);
 
 		const runs = getVal(`${test}-runs`);
@@ -50,56 +48,33 @@ for (let b of document.getElementsByClassName("test-runner")) {
 				results = testSortArray(runs, ...params);
 		}
 
-		const avg = Results.average(results);
-		Results.addToDataset(test, avg);
+		const response = await fetch("/results", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ test, results }),
+		});
 
-		util.updateResult(test, results);
+		if (response.ok) {
+			util.updateResult(test, results);
+		} else {
+			alert("Error Saving Data");
+		}
 	});
 }
 
 for (let b of document.getElementsByClassName("test-plotter")) {
 	const test = b.id.split("-")[0];
-	b.addEventListener("click", (_) => {
-		util.plot(test);
+	b.addEventListener("click", async (_) => {
+		const response = await fetch(`/results/${test}`);
+
+		if (response.ok) {
+			const results = await response.json();
+			util.plot(test, results);
+		}
 	});
 }
-
-document.querySelector("button#save").addEventListener("click", async (_) => {
-	const res = JSON.stringify(results);
-
-	const response = await fetch("/results", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: res,
-	});
-
-	if (!response.ok) {
-		return alert("Error saving data");
-	}
-
-	Object.assign(results, util.getEmptyResults());
-});
-
-document.querySelector("button#load").addEventListener("click", async (_) => {
-	const response = await fetch("/results");
-
-	if (!response.ok) {
-		return alert("Error loading data");
-	}
-
-	const { result, average } = await response.json();
-
-	Object.assign(results, result);
-	Object.assign(averages, average);
-});
-
-document
-	.querySelector("button#clear-local")
-	.addEventListener("click", async (_) => {
-		util.clearResults();
-	});
 
 document
 	.querySelector("button#clear-saved")

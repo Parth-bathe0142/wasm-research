@@ -9,8 +9,9 @@
   "author": "Parth-bathe0142 <parth.bathe0142@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "wasm": "file:rust/wasm",
-    "express": "^5.1.0"
+    "better-sqlite3": "^12.6.2",
+    "express": "^5.1.0",
+    "wasm": "file:rust/wasm"
   },
   "devDependencies": {
     "jest": "^30.2.0"

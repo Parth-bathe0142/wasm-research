@@ -5,3 +5,4 @@ public/multiwasm
 .idea
 
 Result.json
+*.db*
