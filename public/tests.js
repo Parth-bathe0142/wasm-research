@@ -12,10 +12,11 @@ export async function testSum(runs) {
 		const mul = util.run(multi.sum_of_1_000_000_000);
 
 		results.push(new Results("sum", 1, nat, sin, mul));
-		await yieldControl();
+		await util.yieldControl();
 	}
 	return results;
 }
+
 export async function testMatrixMult(runs, s) {
 	const size = parseInt(s);
 
@@ -28,11 +29,12 @@ export async function testMatrixMult(runs, s) {
 		const mul = util.run(multi.matrix_multiplication, mat1, mat2, size);
 
 		results.push(new Results("matrix", size, nat, sin, mul));
-		await yieldControl();
+		await util.yieldControl();
 	}
 
 	return results;
 }
+
 export async function testImageBlur(runs, s) {
 	const size = parseInt(s);
 
@@ -45,11 +47,12 @@ export async function testImageBlur(runs, s) {
 		const mul = util.run(multi.image_blur, image, size);
 
 		results.push(new Results("image", size, nat, sin, mul));
-		await yieldControl();
+		await util.yieldControl();
 	}
 
 	return results;
 }
+
 export async function testGrep(runs, li, le) {
 	const lines = parseInt(li);
 	const length = parseInt(le);
@@ -64,24 +67,44 @@ export async function testGrep(runs, li, le) {
 		const mul = util.run(multi.grep_search, query, content);
 
 		results.push(new Results("grep", lines, nat, sin, mul));
-		await yieldControl();
+		await util.yieldControl();
 	}
 
 	return results;
 }
+
 export async function testSortArray(runs, le) {
 	const length = parseInt(le);
 
 	const results = [];
 	for (let i = 0; i < runs; i++) {
-		const array = Array.from(new Array(length), (_) => Math.random());
+		const array = Array.from(new Array(length), (_) => Math.random() * 1000);
 
 		const nat = util.run(native.sortArray, array);
 		const sin = util.run(single.sort_array, array);
 		const mul = util.run(multi.sort_array, array);
 
 		results.push(new Results("sort", length, nat, sin, mul));
-		await yieldControl();
+		await util.yieldControl();
+	}
+
+	return results;
+}
+
+export async function testCorrelation(runs, le) {
+	const length = parseInt(le);
+
+	const results = [];
+	for (let i = 0; i < runs; i++) {
+		const xi = Array.from(new Array(length), (_) => Math.random() * 1000);
+		const yi = Array.from(new Array(length), (_) => Math.random() * 1000);
+
+		const nat = util.run(native.correlation, xi, yi);
+		const sin = util.run(single.correlation, xi, yi);
+		const mul = util.run(multi.correlation, xi, yi);
+
+		results.push(new Results("correlation", length, nat, sin, mul));
+		await util.yieldControl();
 	}
 
 	return results;

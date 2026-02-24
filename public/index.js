@@ -7,6 +7,7 @@ import {
 	testImageBlur,
 	testGrep,
 	testSortArray,
+	testCorrelation,
 } from "./tests.js";
 
 const cores = 8;
@@ -46,7 +47,11 @@ for (let b of document.getElementsByClassName("test-runner")) {
 				break;
 			case "sort":
 				results = testSortArray(runs, ...params);
+				break;
+			case "correlation":
+				results = testCorrelation(runs, ...params);
 		}
+		results = await results;
 
 		const response = await fetch("/results", {
 			method: "POST",

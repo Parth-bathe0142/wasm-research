@@ -1,6 +1,12 @@
 use rand::{rngs::SmallRng, Rng, RngCore, SeedableRng};
 use wasm_bindgen::prelude::*;
 
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = performance)]
+    fn now() -> f64;
+}
+
 #[wasm_bindgen(start)]
 fn init() {
     console_error_panic_hook::set_once();
@@ -92,11 +98,11 @@ pub fn image_blur(data: &[u8], size: usize) -> Vec<u8> {
 }
 
 #[wasm_bindgen]
-pub fn grep_search(query: String, content: String) -> Vec<String> {
+pub fn grep_search(query: &str, content: &str) -> Vec<String> {
     let mut result = vec![];
 
     for line in content.lines() {
-        if line.contains(query.as_str()) {
+        if line.contains(query) {
             result.push(line.into());
         }
     }
@@ -108,4 +114,29 @@ pub fn grep_search(query: String, content: String) -> Vec<String> {
 pub fn sort_array(mut array: Vec<f64>) -> Vec<f64> {
     array.sort_by(|a, b| a.partial_cmp(b).unwrap());
     array
+}
+
+#[wasm_bindgen]
+pub fn correlation(xi: &[f32], yi: &[f32]) -> f32 {
+    let (x_sum, y_sum) = xi
+        .iter()
+        .zip(yi)
+        .fold((0., 0.), |acc, en| (acc.0 + en.0, acc.1 + en.1));
+
+    let x_mean = x_sum / xi.len() as f32;
+    let y_mean = y_sum / yi.len() as f32;
+
+    let (xy, x_square_sum, y_square_sum) = xi
+        .iter()
+        .zip(yi)
+        .map(|(&x, &y)| {
+            let x = x - x_mean;
+            let y = y - y_mean;
+            (x * y, x * x, y * y)
+        })
+        .fold((0., 0., 0.), |acc, en| {
+            (acc.0 + en.0, acc.1 + en.1, acc.2 + en.2)
+        });
+
+    xy / (x_square_sum * y_square_sum).sqrt()
 }

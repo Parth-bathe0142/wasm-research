@@ -118,7 +118,7 @@ function deleteTests(test) {
 	init();
 	try {
 		if (test) {
-			statements.deletetest.run(test);
+			statements.deleteTest.run(test);
 		} else {
 			statements.deleteAll.run();
 		}

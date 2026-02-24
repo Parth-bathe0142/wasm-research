@@ -89,12 +89,26 @@
                     <button class="test-plotter" id="sort-plotter">RUN</button>
                 </td>
             </tr>
+            <tr>
+                <td>Correlation</td>
+                <td><input type="number" id="correlation-runs" value="20" /></td>
+                <td><input type="number" id="correlation-params" value="200" /></td>
+                <td><span id="correlation-native"></span></td>
+                <td><span id="correlation-single"></span></td>
+                <td><span id="correlation-multi"></span></td>
+                <td>
+                    <button class="test-runner" id="correlation-runner">RUN</button>
+                </td>
+                <td>
+                    <button class="test-plotter" id="correlation-plotter">RUN</button>
+                </td>
+            </tr>
         </table>
         <div>
             <button type="button" id="clear-saved">Clear Saved</button>
         </div>
 
-        <div>
+        <div style="height: 700px; width: 700px;">
             <canvas id="Chart" height="500" width="500"></canvas>
         </div>
     </body>

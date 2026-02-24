@@ -14,7 +14,7 @@ pub fn sum_of_1_000_000_000() -> u64 {
 }
 
 #[wasm_bindgen]
-pub fn matrix_multiplication(a: Vec<f64>, b: Vec<f64>, n: usize) -> Vec<f64> {
+pub fn matrix_multiplication(a: &[f64], b: &[f64], n: usize) -> Vec<f64> {
     let mut result: Vec<f64> = vec![0.0; n * n];
 
     result.par_iter_mut().enumerate().for_each(|(ri, x)| {
@@ -33,7 +33,7 @@ pub fn matrix_multiplication(a: Vec<f64>, b: Vec<f64>, n: usize) -> Vec<f64> {
 }
 
 #[wasm_bindgen]
-pub fn image_blur(data: Vec<u8>, size: usize) -> Vec<u8> {
+pub fn image_blur(data: &[u8], size: usize) -> Vec<u8> {
     let kernel: [u8; 9] = [1, 2, 1, 2, 4, 2, 1, 2, 1];
 
     let mut result = vec![0u8; data.len()];
@@ -70,11 +70,11 @@ pub fn image_blur(data: Vec<u8>, size: usize) -> Vec<u8> {
 }
 
 #[wasm_bindgen]
-pub fn grep_search(query: String, content: String) -> Vec<String> {
+pub fn grep_search(query: &str, content: &str) -> Vec<String> {
     content
         .par_lines()
         .filter_map(|line| {
-            if line.contains(query.as_str()) {
+            if line.contains(query) {
                 Some(line.to_string())
             } else {
                 None
@@ -87,4 +87,31 @@ pub fn grep_search(query: String, content: String) -> Vec<String> {
 pub fn sort_array(mut array: Vec<f64>) -> Vec<f64> {
     array.par_sort_by(|a, b| a.partial_cmp(b).unwrap());
     array
+}
+
+#[wasm_bindgen]
+pub fn correlation(xi: &[f32], yi: &[f32]) -> f32 {
+    let (x_sum, y_sum) = xi
+        .par_iter()
+        .zip(yi.par_iter())
+        .map(|(x, y)| (*x, *y))
+        .reduce(|| (0., 0.), |acc, en| (acc.0 + en.0, acc.1 + en.1));
+
+    let x_mean = x_sum / xi.len() as f32;
+    let y_mean = y_sum / yi.len() as f32;
+
+    let (xy, x_square_sum, y_square_sum) = xi
+        .par_iter()
+        .zip(yi.par_iter())
+        .map(|(&x, &y)| {
+            let x = x - x_mean;
+            let y = y - y_mean;
+            (x * y, x * x, y * y)
+        })
+        .reduce(
+            || (0., 0., 0.),
+            |acc, en| (acc.0 + en.0, acc.1 + en.1, acc.2 + en.2),
+        );
+
+    xy / (x_square_sum * y_square_sum).sqrt()
 }
