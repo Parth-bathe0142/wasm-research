@@ -58,7 +58,7 @@ for (let b of document.getElementsByClassName("test-runner")) {
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ test, results }),
+			body: JSON.stringify({ test, results, browser: util.detectBrowser() }),
 		});
 
 		if (response.ok) {
@@ -72,7 +72,7 @@ for (let b of document.getElementsByClassName("test-runner")) {
 for (let b of document.getElementsByClassName("test-plotter")) {
 	const test = b.id.split("-")[0];
 	b.addEventListener("click", async (_) => {
-		const response = await fetch(`/results/${test}`);
+		const response = await fetch(`/results/${test}/${util.detectBrowser()}`);
 
 		if (response.ok) {
 			const results = await response.json();

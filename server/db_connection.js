@@ -1,21 +1,17 @@
-// @ts-check
-
 const Database = require("better-sqlite3");
 const path = require("path");
 
 /**
- * @type {Database.Database | null}
+ * @typedef {{test: string, param: number, native: number, single: number, multi: number, browser: string}} Result
  */
+
+/** @type {import("better-sqlite3").Database | null} */
 let db = null;
 
-/**
- * @type {Record<String, Database.Statement>}
- */
+/** @type {Record<String, import("better-sqlite3").Statement>}*/
 let statements;
 
-/**
- * @type {Record<string, Database.Transaction>}
- */
+/** @type {Record<string, import("better-sqlite3").Transaction>}*/
 let transaction;
 
 function init() {
@@ -27,6 +23,7 @@ function init() {
 	db.prepare(
 		`create table if not exists Results (
 			id integer primary key autoincrement,
+			browser text,
 			test text not null,
 			param integer not null,
 			native real,
@@ -37,15 +34,14 @@ function init() {
 
 	statements = {
 		insertResult: db.prepare(`
-			insert into Results(test, param, native, single, multi)
-			values (:test, :param, :native, :single, :multi)
+			insert into Results(test, param, native, single, multi, browser)
+			values (:test, :param, :native, :single, :multi, :browser)
 		`),
 
-		averaged: db.prepare(`
-			select param, avg(native) as native, avg(single) as single, avg(multi) as multi
+		fetchResults: db.prepare(`
+			select param, native, single, multi
 			from Results
-			where test = ?
-			group by param
+			where test = ? and browser = ?
 			order by param
 			`),
 
@@ -67,10 +63,14 @@ function init() {
 	return db;
 }
 
-/**
- * @typedef {{test: string, param: number, native: number, single: number, multi: number}} Result
- * @param {Result[]} results
- */
+function closeDB() {
+	if (db) {
+		console.log("Closing db");
+		db.close();
+	}
+}
+
+/** @param {Result[]} results */
 function addResults(results) {
 	init();
 	try {
@@ -81,26 +81,69 @@ function addResults(results) {
 }
 
 /**
+ * @param {number[]} values
+ * @returns {number}
+ */
+function median(values) {
+	values.sort((a, b) => a - b);
+	const mid = Math.floor((values.length - 1) / 2); // lower middle only in case of even count
+	return values[mid];
+}
+
+/**
+ * @param {Record<string, string>} row
+ * @returns {Result}
+ */
+function toResult(row) {
+	return {
+		test: row.test,
+		param: Number(row.param),
+		native: Number(row.native),
+		single: Number(row.single),
+		multi: Number(row.multi),
+		browser: row.browser,
+	};
+}
+
+/**
  * @param {string} test
+ * @param {string} browser
  * @returns {Result[]}
  */
-function getAveragedResults(test) {
+function getMedianResults(test, browser) {
 	init();
 	try {
-		const rows = statements.averaged.all(test);
+		const rows = statements.fetchResults.all(test, browser).map(toResult);
+		const groups = new Map();
 
-		const results = rows.map((row) => ({
-			// @ts-ignore
-			test: row.test,
-			// @ts-ignore
-			param: Number(row.param),
-			// @ts-ignore
-			native: Number(row.native),
-			// @ts-ignore
-			single: Number(row.single),
-			// @ts-ignore
-			multi: Number(row.multi),
-		}));
+		for (let i = 0; i < rows.length; i++) {
+			const row = rows[i];
+			if (!groups.has(row.param)) {
+				groups.set(row.param, {
+					native: [],
+					single: [],
+					multi: [],
+				});
+			}
+
+			const g = groups.get(row.param);
+			g.native.push(row.native);
+			g.single.push(row.single);
+			g.multi.push(row.multi);
+		}
+
+		const results = [];
+
+		for (const [param, g] of groups) {
+			results.push({
+				param,
+				native: median(g.native),
+				single: median(g.single),
+				multi: median(g.multi),
+			});
+		}
+
+		results.sort((a, b) => a.param - b.param);
 
 		return results;
 	} catch (e) {
@@ -110,10 +153,7 @@ function getAveragedResults(test) {
 	return [];
 }
 
-/**
- *
- * @param {string?} test
- */
+/** @param {string?} test */
 function deleteTests(test) {
 	init();
 	try {
@@ -129,6 +169,7 @@ function deleteTests(test) {
 
 module.exports = {
 	addResults,
-	getAveragedResults,
+	getMedianResults,
 	deleteTests,
+	closeDB,
 };

@@ -27,7 +27,8 @@ export function updateResult(test, result) {
 	document.getElementById(`${test}-single`).innerText =
 		average.single.toFixed(4);
 
-	document.getElementById(`${test}-multi`).innerText = average.multi.toFixed(4);
+	document.getElementById(`${test}-multi`).innerText =
+		average.multi.toFixed(4);
 }
 
 let chart = null;
@@ -115,6 +116,29 @@ export function plot(test, results, canvasId = "Chart") {
 			},
 		},
 	});
+}
+
+let browser = null;
+
+export function detectBrowser() {
+	if (browser) return browser;
+
+	const ua = navigator.userAgent;
+
+	if (ua.includes("Edg/")) {
+		browser = "Microsoft Edge";
+	} else if (ua.includes("Firefox/")) {
+		browser = "Firefox";
+	} else if (ua.includes("Chrome/") && !ua.includes("Edg/")) {
+		browser = "Chrome";
+	} else if (ua.includes("Safari/") && !ua.includes("Chrome/")) {
+		browser = "Safari";
+	} else {
+		browser = "Other";
+	}
+
+	document.getElementById('browser-name').textContent = browser
+	return browser;
 }
 
 export function randomMatrices(width) {

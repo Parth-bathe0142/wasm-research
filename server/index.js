@@ -2,8 +2,9 @@ const express = require("express");
 const path = require("path");
 const {
 	addResults,
-	getAveragedResults,
+	getMedianResults,
 	deleteTests,
+	closeDB,
 } = require("./db_connection");
 const app = express();
 
@@ -20,19 +21,20 @@ app.use((_, res, next) => {
 app.use("/", express.static(path.join(__dirname, "../public")));
 app.use(express.json());
 
-app.get("/results/:test", (req, res) => {
-	const test = req.params.test;
-	const averaged = getAveragedResults(test);
-	res.json(averaged);
+app.get("/results/:test/:browser", (req, res) => {
+	const { test, browser } = req.params;
+	const processed = getMedianResults(test, browser);
+	res.json(processed);
 });
 
 app.post("/results", (req, res) => {
-	const { results, test } = req.body;
+	const { results, test, browser } = req.body;
 
 	addResults(results);
 
-	const averaged = getAveragedResults(test);
-	res.json(averaged);
+	const processed = getMedianResults(test, browser);
+	res.json(processed);
+	console.log(processed);
 });
 
 app.delete("/results", (_, res) => {
@@ -61,3 +63,8 @@ app.use((_, res) => {
 });
 
 app.listen(3000, () => console.log("listening at http://localhost:3000"));
+
+process.on('SIGINT', _ => {
+	closeDB()
+	process.exit(0)
+})

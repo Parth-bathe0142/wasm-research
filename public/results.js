@@ -1,3 +1,5 @@
+import * as util from "./util.js";
+
 export class Results {
 	/**
 	 * @param {Results[]} results
@@ -31,5 +33,6 @@ export class Results {
 		this.native = native;
 		this.single = single;
 		this.multi = multi;
+		this.browser = util.detectBrowser();
 	}
 }
