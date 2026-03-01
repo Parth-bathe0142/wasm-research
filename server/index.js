@@ -3,7 +3,8 @@ const path = require("path");
 const {
 	addResults,
 	getMedianResults,
-	deleteTests,
+	deleteTestsOnBrowser,
+	deleteAll,
 	closeDB,
 } = require("./db_connection");
 const app = express();
@@ -39,7 +40,7 @@ app.post("/results", (req, res) => {
 
 app.delete("/results", (_, res) => {
 	try {
-		deleteTests();
+		deleteAll();
 
 		res.status(200).send();
 	} catch (e) {
@@ -47,10 +48,10 @@ app.delete("/results", (_, res) => {
 	}
 });
 
-app.delete("/results/:test", (req, res) => {
+app.delete("/results/:test/:browser", (req, res) => {
 	try {
-		let test = req.params.test;
-		deleteTests(test);
+		let { test, browser } = req.params;
+		deleteTestsOnBrowser(test, browser);
 
 		res.status(200).send();
 	} catch (e) {
@@ -64,7 +65,7 @@ app.use((_, res) => {
 
 app.listen(3000, () => console.log("listening at http://localhost:3000"));
 
-process.on('SIGINT', _ => {
-	closeDB()
-	process.exit(0)
-})
+process.on("SIGINT", (_) => {
+	closeDB();
+	process.exit(0);
+});

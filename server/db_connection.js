@@ -43,13 +43,15 @@ function init() {
 			from Results
 			where test = ? and browser = ?
 			order by param
-			`),
+		`),
 
 		deleteAll: db.prepare(`
 			delete from Results
 		`),
 
-		deleteTest: db.prepare(`delete from Results where test = ?`),
+		deleteTest: db.prepare(
+			`delete from Results where test = ? and browser = ?`,
+		),
 	};
 
 	transaction = {
@@ -154,14 +156,20 @@ function getMedianResults(test, browser) {
 }
 
 /** @param {string?} test */
-function deleteTests(test) {
+function deleteAll() {
 	init();
 	try {
-		if (test) {
-			statements.deleteTest.run(test);
-		} else {
-			statements.deleteAll.run();
-		}
+		statements.deleteAll.run();
+	} catch (e) {
+		console.log(e);
+	}
+}
+
+/** @param {string?} test */
+function deleteTestsOnBrowser(test, browser) {
+	init();
+	try {
+		statements.deleteTest.run(test, browser);
 	} catch (e) {
 		console.log(e);
 	}
@@ -170,6 +178,7 @@ function deleteTests(test) {
 module.exports = {
 	addResults,
 	getMedianResults,
-	deleteTests,
+	deleteTestsOnBrowser,
+	deleteAll,
 	closeDB,
 };

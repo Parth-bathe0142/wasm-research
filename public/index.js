@@ -21,8 +21,9 @@ async function main() {
 }
 main();
 
-for (let b of document.getElementsByClassName("test-warmup")) {
-	const getVal = (id) => document.querySelector(`#${id}`)?.value;
+const getVal = (id) => document.querySelector(`#${id}`)?.value;
+
+for (const b of document.getElementsByClassName("test-warmup")) {
 	const test = b.id.split("-")[0];
 
 	b.addEventListener("click", async (_) => {
@@ -65,8 +66,7 @@ for (let b of document.getElementsByClassName("test-warmup")) {
 	});
 }
 
-for (let b of document.getElementsByClassName("test-runner")) {
-	const getVal = (id) => document.querySelector(`#${id}`)?.value;
+for (const b of document.getElementsByClassName("test-runner")) {
 	const test = b.id.split("-")[0];
 
 	b.addEventListener("click", async (_) => {
@@ -117,14 +117,15 @@ for (let b of document.getElementsByClassName("test-runner")) {
 
 		b.classList.toggle("running");
 		if (response.ok) {
-			util.updateResult(test, results);
+			const processed = await response.json();
+			util.updateResult(test, processed);
 		} else {
 			alert("Error Saving Data");
 		}
 	});
 }
 
-for (let b of document.getElementsByClassName("test-plotter")) {
+for (const b of document.getElementsByClassName("test-plotter")) {
 	const test = b.id.split("-")[0];
 	b.addEventListener("click", async (_) => {
 		const response = await fetch(
@@ -134,6 +135,23 @@ for (let b of document.getElementsByClassName("test-plotter")) {
 		if (response.ok) {
 			const results = await response.json();
 			util.plot(test, results);
+		}
+	});
+}
+
+for (const b of document.getElementsByClassName("test-deleter")) {
+	const test = b.id.split("-")[0];
+
+	b.addEventListener("click", async (_) => {
+		const response = await fetch(
+			`/results/${test}/${util.detectBrowser()}`,
+			{
+				method: "DELETE",
+			},
+		);
+
+		if (!response.ok) {
+			alert("Failed to delete saved data");
 		}
 	});
 }
