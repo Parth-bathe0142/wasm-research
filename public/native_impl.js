@@ -39,13 +39,13 @@ export function imageBlur(data, size) {
 	const result = new Uint8ClampedArray(data.length);
 
 	for (let i = 0; i < data.length; i++) {
-		const x = i / size;
+		const x = Math.floor(i / size);
 		const y = i % size;
 
 		let acc = 0;
 		let weight = 0;
 		for (let j = 0; j < 9; j++) {
-			const kx = j / 3 - 1;
+			const kx = Math.floor(j / 3) - 1;
 			const ky = (j % 3) - 1;
 
 			const dx = kx + x;
