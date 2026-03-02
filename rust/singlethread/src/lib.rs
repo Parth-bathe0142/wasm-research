@@ -1,4 +1,3 @@
-use rand::{rngs::SmallRng, Rng, RngCore, SeedableRng};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -10,34 +9,6 @@ extern "C" {
 #[wasm_bindgen(start)]
 fn init() {
     console_error_panic_hook::set_once();
-}
-
-#[wasm_bindgen]
-pub fn random_grep_data(lines: i32, length: i32, query: String) -> String {
-    let mut content = "".to_string();
-    let mut srng = SmallRng::seed_from_u64(getrandom::u64().unwrap());
-
-    for _ in 0..lines {
-        let mut bytes = vec![0u8; length as usize];
-        srng.fill_bytes(bytes.as_mut_slice());
-
-        let mut str = bytes
-            .iter()
-            .map(|x| char::from(b'a' + *x % 26u8))
-            .collect::<String>();
-
-        str.push_str("\n");
-
-        let chance = srng.random::<f32>();
-        if chance < 0.3 {
-            let pos = srng.random::<u8>() as usize % length as usize;
-            str.insert_str(pos, query.as_str());
-        }
-
-        content.push_str(&str);
-    }
-
-    content
 }
 
 #[wasm_bindgen]

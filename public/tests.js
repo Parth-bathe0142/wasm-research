@@ -53,14 +53,13 @@ export async function testImageBlur(runs, s) {
 	return results;
 }
 
-export async function testGrep(runs, li, le) {
+export async function testGrep(runs, li) {
 	const lines = parseInt(li);
-	const length = parseInt(le);
 	const query = "test";
 
 	const results = [];
 	for (let i = 0; i < runs; i++) {
-		const content = single.random_grep_data(lines, length, query) || "";
+		const content = util.randomGrepData(lines, 100, query);
 
 		const nat = util.run(native.grepSearch, query, content);
 		const sin = util.run(single.grep_search, query, content);

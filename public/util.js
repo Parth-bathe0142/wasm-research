@@ -137,7 +137,7 @@ export function detectBrowser() {
 		browser = "Other";
 	}
 
-	document.getElementById('browser-name').textContent = browser
+	document.getElementById("browser-name").textContent = browser;
 	return browser;
 }
 
@@ -168,4 +168,25 @@ export function randomImage(width, height) {
 	}
 
 	return image;
+}
+
+export function randomGrepData(lines, length, query) {
+	let content = "";
+
+	for (let i = 0; i < lines; i++) {
+		let str = Array.from({ length }, () =>
+			String.fromCharCode(
+				"a".charCodeAt(0) + Math.floor(Math.random() * 26),
+			),
+		).join("");
+
+		if (Math.random() < 0.3) {
+			const pos = Math.floor(Math.random() * length);
+			str = str.slice(0, pos) + query + str.slice(pos);
+		}
+
+		content += str + "\n";
+	}
+
+	return content;
 }

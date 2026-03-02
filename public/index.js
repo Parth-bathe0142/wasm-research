@@ -117,8 +117,7 @@ for (const b of document.getElementsByClassName("test-runner")) {
 
 		b.classList.toggle("running");
 		if (response.ok) {
-			const processed = await response.json();
-			util.updateResult(test, processed);
+			util.updateResult(test, results);
 		} else {
 			alert("Error Saving Data");
 		}
