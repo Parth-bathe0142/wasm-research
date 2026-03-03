@@ -1,15 +1,26 @@
+[config]
+default_to_workspace = false
+
 [env]
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
 
-[tasks.compile-singlethread]
-cwd = "D:/wasm-research/rust/singlethread"
+[tasks.build-singlethread]
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
 command = "wasm-pack"
-args = ["build", "--target", "web", "--out-dir", "../../public/singlewasm"]
+args = ["build", "singlethread", "--target", "web", "--out-dir", "../../public/singlewasm"]
 
-[tasks.compile-multithread]
-cwd = "D:/wasm-research/rust/multithread"
+[tasks.build-multithread]
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
 command = "wasm-pack"
-args = ["build", "--target", "web", "--out-dir", "../../public/multiwasm"]
+args = [
+  "build", "multithread", "--target", "web",
+  "--out-dir", "../../public/multiwasm",
+  "--",
+  "-Z", "build-std=panic_abort,std",
+]
 
-[tasks.build]
-dependencies = ["compile-singlethread", "compile-multithread"]
+[tasks.build-multithread.env]
+CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS = "-C target-feature=+atomics,+bulk-memory"
+
+[tasks.build-wasm]
+dependencies = ["build-singlethread", "build-multithread"]
