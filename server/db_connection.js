@@ -1,18 +1,43 @@
 const Database = require("better-sqlite3");
 const path = require("path");
+const { computeReport } = require("./report");
+const { median } = require("./report/stats.js");
 
 /**
- * @typedef {{test: string, param: number, native: number, single: number, multi: number, browser: string}} Result
+ * @typedef {Object} Result
+ * @property {string}      browser
+ * @property {string}      test
+ * @property {number}      param
+ * @property {number|null} native
+ * @property {number|null} single
+ * @property {number|null} multi
+ */
+
+/**
+ * @typedef {Object} Report
+ * @property {string}      browser
+ * @property {string}      test
+ * @property {number|null} native_median
+ * @property {number|null} single_median
+ * @property {number|null} multi_median
+ * @property {number|null} native_cv
+ * @property {number|null} single_cv
+ * @property {number|null} multi_cv
+ * @property {number|null} single_overhead
+ * @property {number|null} multi_overhead
+ * @property {number|null} multi_vs_single_speedup
+ * @property {number}      param_min
+ * @property {number}      param_max
  */
 
 /** @type {import("better-sqlite3").Database | null} */
-let db = null;
+let db;
 
 /** @type {Record<String, import("better-sqlite3").Statement>}*/
 let statements;
 
 /** @type {Record<string, import("better-sqlite3").Transaction>}*/
-let transaction;
+let transactions;
 
 function init() {
 	if (db) return db;
@@ -20,22 +45,41 @@ function init() {
 	db = new Database(path.join(__dirname, "../results.db"));
 	db.pragma("journal_mode = WAL");
 
-	db.prepare(
-		`create table if not exists Results (
-			id integer primary key autoincrement,
-			browser text,
-			test text not null,
-			param integer not null,
-			native real,
-			single real,
-			multi real
-		)`,
-	).run();
+	db.exec(`
+		create table if not exists Results (
+			id         integer primary key autoincrement,
+			browser    text,
+			test       text not null,
+			param      integer not null,
+			native     real,
+			single     real,
+			multi      real
+		)
+	`);
+
+	db.exec(`
+    	CREATE TABLE IF NOT EXISTS Report (
+    		id                      interger primary key autoincrement,
+    		browser                 text not null,
+    		test                    text not null,
+    		native_median           real,
+    		single_median           real,
+    		multi_median            real,
+    		native_cv               real,
+    		single_cv               real,
+    		multi_cv                real,
+    		single_overhead         real,
+    		multi_overhead          real,
+    		multi_vs_single_speedup real,
+    		param_min               integer not null,
+    		param_max               integer not null,
+    		UNIQUE(browser, test)
+    	)
+  `);
 
 	statements = {
-		insertResult: db.prepare(`
-			insert into Results(test, param, native, single, multi, browser)
-			values (:test, :param, :native, :single, :multi, :browser)
+		fetchAllResults: db.prepare(`
+			select browser, test, param, native, single, multi from Results
 		`),
 
 		fetchResults: db.prepare(`
@@ -45,19 +89,48 @@ function init() {
 			order by param
 		`),
 
+		insertResult: db.prepare(`
+			insert into Results(test, param, native, single, multi, browser)
+			values (:test, :param, :native, :single, :multi, :browser)
+		`),
+
+		insertReport: db.prepare(`
+		    INSERT INTO Report (
+				browser, test,
+				native_median, single_median, multi_median,
+				native_cv, single_cv, multi_cv,
+				single_overhead, multi_overhead, multi_vs_single_speedup,
+				param_min, param_max
+			)
+	      	VALUES (
+				:browser, :test,
+				:native_median, :single_median, :multi_median,
+				:native_cv, :single_cv, :multi_cv,
+				:single_overhead, :multi_overhead, :multi_vs_single_speedup,
+				:param_min, :param_max
+			)
+	    `),
+
 		deleteAll: db.prepare(`
 			delete from Results
 		`),
 
-		deleteTest: db.prepare(
-			`delete from Results where test = ? and browser = ?`,
-		),
+		deleteTest: db.prepare(`
+	      	delete from Results where test = ? and browser = ?
+	    `),
 	};
 
-	transaction = {
-		insertAll: db.transaction((/** @type {Result[]} */ rows) => {
+	transactions = {
+		insertAllResults: db.transaction((/** @type {Result[]} */ rows) => {
 			for (const row of rows) {
 				statements.insertResult.run(row);
+			}
+		}),
+
+		insertAllReports: db.transaction((/** @type {Report[]} */ rows) => {
+			db.exec("DELETE FROM Report;");
+			for (const row of rows) {
+				statements.insertReport.run(row);
 			}
 		}),
 	};
@@ -76,20 +149,10 @@ function closeDB() {
 function addResults(results) {
 	init();
 	try {
-		transaction.insertAll(results);
+		transactions.insertAllResults(results);
 	} catch (e) {
 		console.log(e);
 	}
-}
-
-/**
- * @param {number[]} values
- * @returns {number}
- */
-function median(values) {
-	values.sort((a, b) => a - b);
-	const mid = Math.floor((values.length - 1) / 2); // lower middle only in case of even count
-	return values[mid];
 }
 
 /**
@@ -104,6 +167,29 @@ function toResult(row) {
 		single: Number(row.single),
 		multi: Number(row.multi),
 		browser: row.browser,
+	};
+}
+
+/**
+ *
+ * @param {Record<string, string>} row
+ * @returns {Report}
+ */
+function toReport(row) {
+	return {
+		browser: row.browser,
+		test: row.test,
+		native_median: Number(row.native_median),
+		single_median: Number(row.single_median),
+		multi_median: Number(row.multi_median),
+		native_min: Number(row.native_min),
+		single_min: Number(row.single_min),
+		multi_min: Number(row.multi_min),
+		native_max: Number(row.native_max),
+		single_max: Number(row.single_max),
+		multi_max: Number(row.multi_max),
+		param_min: Number(row.param_min),
+		param_max: Number(row.param_max),
 	};
 }
 
@@ -153,6 +239,17 @@ function getMedianResults(test, browser) {
 	}
 
 	return [];
+}
+
+function generateReports() {
+	const results = statements.fetchAllResults.all().map(toResult);
+
+	const reports = computeReport(results);
+
+	transactions.insertAllReports(reports);
+	console.log(`${reports.length} report rows generated.`);
+
+	db.close();
 }
 
 /** @param {string?} test */
