@@ -17,15 +17,15 @@ const { median } = require("./report/stats.js");
  * @typedef {Object} Report
  * @property {string}      browser
  * @property {string}      test
- * @property {number|null} native_median
- * @property {number|null} single_median
- * @property {number|null} multi_median
+ * @property {number|null} native_md
+ * @property {number|null} single_md
+ * @property {number|null} multi_md
  * @property {number|null} native_cv
  * @property {number|null} single_cv
  * @property {number|null} multi_cv
- * @property {number|null} single_overhead
- * @property {number|null} multi_overhead
- * @property {number|null} multi_vs_single_speedup
+ * @property {number|null} single_oh
+ * @property {number|null} multi_oh
+ * @property {number|null} thread_speedup
  * @property {number}      param_min
  * @property {number}      param_max
  */
@@ -59,7 +59,7 @@ function init() {
 
 	db.exec(`
     	CREATE TABLE IF NOT EXISTS Report (
-    		id                      interger primary key autoincrement,
+    		id                      integer primary key autoincrement,
     		browser                 text not null,
     		test                    text not null,
     		native_median           real,
@@ -75,7 +75,7 @@ function init() {
     		param_max               integer not null,
     		UNIQUE(browser, test)
     	)
-  `);
+    `);
 
 	statements = {
 		fetchAllResults: db.prepare(`
@@ -104,9 +104,9 @@ function init() {
 			)
 	      	VALUES (
 				:browser, :test,
-				:native_median, :single_median, :multi_median,
+				:native_md, :single_md, :multi_md,
 				:native_cv, :single_cv, :multi_cv,
-				:single_overhead, :multi_overhead, :multi_vs_single_speedup,
+				:single_oh, :multi_oh, :thread_speedup,
 				:param_min, :param_max
 			)
 	    `),
@@ -242,6 +242,7 @@ function getMedianResults(test, browser) {
 }
 
 function generateReports() {
+	init();
 	const results = statements.fetchAllResults.all().map(toResult);
 
 	const reports = computeReport(results);
@@ -249,7 +250,7 @@ function generateReports() {
 	transactions.insertAllReports(reports);
 	console.log(`${reports.length} report rows generated.`);
 
-	db.close();
+	return reports;
 }
 
 /** @param {string?} test */
@@ -274,6 +275,7 @@ function deleteTestsOnBrowser(test, browser) {
 
 module.exports = {
 	addResults,
+	generateReports,
 	getMedianResults,
 	deleteTestsOnBrowser,
 	deleteAll,

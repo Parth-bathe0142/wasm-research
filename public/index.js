@@ -166,3 +166,17 @@ document
 			alert("Failed to delete saved data");
 		}
 	});
+
+document
+	.getElementById("generate-report")
+	.addEventListener("click", async (_) => {
+		const response = await fetch("/reports");
+
+		if (!response.ok) {
+			alert("Failed to load reports");
+		} else {
+			const table = await response.text();
+
+			document.getElementById("report-container").innerHTML = table;
+		}
+	});

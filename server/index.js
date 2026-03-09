@@ -6,7 +6,9 @@ const {
 	deleteTestsOnBrowser,
 	deleteAll,
 	closeDB,
+	generateReports,
 } = require("./db_connection");
+const { createTable } = require("./report");
 const app = express();
 
 app.use((_, res, next) => {
@@ -28,6 +30,12 @@ app.get("/results/:test/:browser", (req, res) => {
 	res.json(processed);
 });
 
+app.get("/reports", (_, res) => {
+	const reports = generateReports();
+	const table = createTable(reports);
+	res.send(table);
+});
+
 app.post("/results", (req, res) => {
 	const { results, test, browser } = req.body;
 
@@ -35,7 +43,6 @@ app.post("/results", (req, res) => {
 
 	const processed = getMedianResults(test, browser);
 	res.json(processed);
-	console.log(processed);
 });
 
 app.delete("/results", (_, res) => {
