@@ -1,0 +1,15 @@
+{
+  "name": "singlethread",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "singlethread_bg.wasm",
+    "singlethread.js",
+    "singlethread.d.ts"
+  ],
+  "main": "singlethread.js",
+  "types": "singlethread.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

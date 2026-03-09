@@ -1,0 +1,15 @@
+{
+  "name": "multithread",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "multithread_bg.wasm",
+    "multithread.js",
+    "multithread.d.ts"
+  ],
+  "main": "multithread.js",
+  "types": "multithread.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
