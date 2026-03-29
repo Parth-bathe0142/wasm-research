@@ -78,10 +78,12 @@ export async function testSortArray(runs, le) {
 	const results = [];
 	for (let i = 0; i < runs; i++) {
 		const array = Array.from(new Array(length), (_) => Math.random() * 1000);
+		const arr1 = [...array];
+		const arr2 = [...array];	
 
 		const nat = util.run(native.sortArray, array);
-		const sin = util.run(single.sort_array, array);
-		const mul = util.run(multi.sort_array, array);
+		const sin = util.run(single.sort_array, arr1);
+		const mul = util.run(multi.sort_array, arr2);
 
 		results.push(new Results("sort", length, nat, sin, mul));
 		await util.yieldControl();
