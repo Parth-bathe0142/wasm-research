@@ -7,9 +7,9 @@ export function run(fn, ...args) {
 	return end - start;
 }
 
-export function yieldControl() {
+export function yieldControl(timeout = 10) {
 	return new Promise((res) => {
-		setTimeout(res, 10);
+		setTimeout(res, timeout);
 	});
 }
 

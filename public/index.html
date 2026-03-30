@@ -35,6 +35,9 @@
                     <button class="test-deleter" id="sum-deleter">
                         Delete
                     </button>
+                    <button class="test-automation" id="sum-automation">
+                        Automate
+                    </button>
                 </td>
             </tr>
             <tr>
@@ -54,6 +57,9 @@
                     </button>
                     <button class="test-deleter" id="matrix-deleter">
                         Delete
+                    </button>
+                    <button class="test-automation" id="matrix-automation">
+                        Automate
                     </button>
                 </td>
             </tr>
@@ -75,6 +81,9 @@
                     <button class="test-deleter" id="image-deleter">
                         Delete
                     </button>
+                    <button class="test-automation" id="image-automation">
+                        Automate
+                    </button>
                 </td>
             </tr>
             <tr>
@@ -93,6 +102,9 @@
                     <button class="test-deleter" id="grep-deleter">
                         Delete
                     </button>
+                    <button class="test-automation" id="grep-automation">
+                        Automate
+                    </button>
                 </td>
             </tr>
             <tr>
@@ -110,6 +122,9 @@
                     <button class="test-plotter" id="sort-plotter">Plot</button>
                     <button class="test-deleter" id="sort-deleter">
                         Delete
+                    </button>
+                    <button class="test-automation" id="sort-automation">
+                        Automate
                     </button>
                 </td>
             </tr>
@@ -137,6 +152,9 @@
                     <button class="test-deleter" id="correlation-deleter">
                         Delete
                     </button>
+                    <button class="test-automation" id="correlation-automation">
+                        Automate
+                    </button>
                 </td>
             </tr>
         </table>
@@ -144,14 +162,17 @@
             <button type="button" id="clear-saved">Clear Saved</button
             >&nbsp;&nbsp; Browser: <span id="browser-name"></span>
         </div>
-
+        <div id="report">
+        	<button id="generate-report">Generate Reports</button>
+        </div>
+        <div id="automation">
+        	<button id="run-automation">Run Automation</button>
+        </div>
+        
         <div style="height: 700px; width: 700px">
             <canvas id="Chart" height="500" width="500"></canvas>
         </div>
-        <div id="report">
-        	<button id="generate-report">Generate Reports</button>
-         	<div id="report-container"></div>
-        </div>
+        <div id="report-container"></div>
     </body>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" async></script>
     <script type="module" src="util.js"></script>

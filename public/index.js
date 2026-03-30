@@ -9,6 +9,7 @@ import {
 	testSortArray,
 	testCorrelation,
 } from "./tests.js";
+import { defaultConfig, runAutomation } from "./automation.js";
 
 const cores = 8;
 
@@ -155,6 +156,15 @@ for (const b of document.getElementsByClassName("test-deleter")) {
 	});
 }
 
+for (const b of document.getElementsByClassName("test-automation")) {
+	const test = b.id.split("-")[0];
+
+	b.addEventListener("click", async (_) => {
+		const config = defaultConfig[test]
+		runAutomation({[test]: config});
+	});
+}
+
 document
 	.querySelector("button#clear-saved")
 	.addEventListener("click", async (_) => {
@@ -179,4 +189,10 @@ document
 
 			document.getElementById("report-container").innerHTML = table;
 		}
+	});
+
+document
+	.getElementById("run-automation")
+	.addEventListener("click", async (_) => {
+		runAutomation();
 	});
