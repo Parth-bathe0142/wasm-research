@@ -1,145 +1,110 @@
 import * as util from "./util.js";
 import {
-	testSum,
-	testMatrixMult,
-	testImageBlur,
-	testGrep,
-	testSortArray,
-	testCorrelation,
+  testSum,
+  testMatrixMult,
+  testImageBlur,
+  testGrep,
+  testSortArray,
+  testCorrelation,
 } from "./tests.js";
 
 /**
- * @type {Record<string, {runs: number, min?: number, max?: number, step?: number}>}
+ * @typedef Config {{runs: number, min?: number, max?: number, step?: number, test?: (number, number) => Promise<Results[]>}}
+ * @type {Config[]}
  */
-export const defaultConfig = {
-	sum: { runs: 50 },
-	matrix: { runs: 75, min: 20, max: 400, step: 20 },
-	image: { runs: 75, min: 50, max: 600, step: 50 },
-	grep: { runs: 75, min: 50, max: 500, step: 50 },
-	sort: { runs: 75, min: 50, max: 1000, step: 50 },
-	correlation: { runs: 75, min: 100, max: 10000, step: 100 },
-};
+export const defaultConfig = [
+  { name: "sum", runs: 50 },
+  {
+    name: "matrix",
+    runs: 50,
+    min: 20,
+    max: 400,
+    step: 20,
+    test: testMatrixMult,
+  },
+  { name: "image", runs: 50, min: 50, max: 600, step: 50, test: testImageBlur },
+  { name: "grep", runs: 50, min: 100, max: 1000, step: 50, test: testGrep },
+  {
+    name: "sort",
+    runs: 50,
+    min: 100,
+    max: 3000,
+    step: 100,
+    test: testSortArray,
+  },
+  {
+    name: "correlation",
+    runs: 50,
+    min: 200,
+    max: 30000,
+    step: 200,
+    test: testCorrelation,
+  },
+];
+
+const warmups = 100;
+const warmupDelay = 200;
+const testDelay = 500;
 
 function range(min, max, step) {
-	const arr = [];
-	for (let i = min; i <= max; i += step) {
-		arr.push(i);
-	}
-	return arr;
+  const arr = [];
+  for (let i = min; i <= max; i += step) {
+    arr.push(i);
+  }
+  return arr;
 }
 
 function shuffle(arr) {
-	return arr.sort(() => Math.random() - 0.5);
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 async function runAndSend(test, results) {
-	const response = await fetch("/results", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			test,
-			results,
-			browser: util.detectBrowser(),
-		}),
-	});
+  const response = await fetch("/results", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      test,
+      results,
+      browser: util.detectBrowser(),
+    }),
+  });
 
-	if (!response.ok) {
-		console.error(`Failed to save ${test}`);
-	}
+  if (!response.ok) {
+    console.error(`Failed to save ${test}`);
+  }
 }
 
-export async function runAutomation(config = defaultConfig) {
-	console.log("Starting automated benchmark...");
+export async function runAutomation(configs = defaultConfig) {
+  for (const config of configs) {
+    if (config.name === "sum") {
+      console.log("Running sum...");
+      const results = await testSum(config.runs);
+      await runAndSend("sum", results);
+    } else {
+      await automate(config);
+    }
+  }
+  alert("Complete");
+}
 
-	// SUM (no params)
-	if (config.sum) {
-		console.log("Running sum...");
-		const results = await testSum(config.sum.runs);
-		await runAndSend("sum", results);
-	}
+async function automate(config) {
+  const { name, runs, min, max, step, test } = config;
+  for (const size of shuffle(range(min, max, step))) {
+    console.log(`${name} size ${size}`);
 
-	// MATRIX
-	if (config.matrix) {
-		const { runs, min, max, step } = config.matrix;
-		for (const size of shuffle(range(min, max, step))) {
-			console.log(`Matrix size ${size}`);
+    await test(warmups, size);
+    await util.yieldControl(warmupDelay);
 
-			const _ = await testMatrixMult(100, size);
-			await util.yieldControl(100);
+    const results = await test(runs, size);
+    await runAndSend(name, results);
 
-			const results = await testMatrixMult(runs, size);
-			await runAndSend("matrix", results);
-
-			await util.yieldControl(200);
-		}
-	}
-
-	// IMAGE
-	if (config.image) {
-		const { runs, min, max, step } = config.image;
-		for (const size of shuffle(range(min, max, step))) {
-			console.log(`Image size ${size}`);
-
-			const _ = await testImageBlur(100, size);
-			await util.yieldControl(100);
-
-			const results = await testImageBlur(runs, size);
-			await runAndSend("image", results);
-
-			await util.yieldControl(200);
-		}
-	}
-
-	// GREP
-	if (config.grep) {
-		const { runs, min, max, step } = config.grep;
-		for (const lines of shuffle(range(min, max, step))) {
-			console.log(`Grep lines ${lines}`);
-
-			const _ = await testGrep(100, lines);
-			await util.yieldControl(100);
-
-			const results = await testGrep(runs, lines);
-			await runAndSend("grep", results);
-
-			await util.yieldControl(200);
-		}
-	}
-
-	// SORT
-	if (config.sort) {
-		const { runs, min, max, step } = config.sort;
-		for (const length of shuffle(range(min, max, step))) {
-			console.log(`Sort length ${length}`);
-
-			const _ = await testSortArray(100, length);
-			await util.yieldControl(100);
-
-			const results = await testSortArray(runs, length);
-			await runAndSend("sort", results);
-
-			await util.yieldControl(200);
-		}
-	}
-
-	// CORRELATION
-	if (config.correlation) {
-		const { runs, min, max, step } = config.correlation;
-		for (const length of shuffle(range(min, max, step))) {
-			console.log(`Correlation length ${length}`);
-
-			const _ = await testCorrelation(100, length);
-			await util.yieldControl(100);
-
-			const results = await testCorrelation(runs, length);
-			await runAndSend("correlation", results);
-
-			await util.yieldControl(200);
-		}
-	}
-
-	console.log("Benchmark suite complete.");
-	alert("Complete");
+    await util.yieldControl(testDelay);
+  }
 }
