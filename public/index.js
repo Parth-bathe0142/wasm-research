@@ -9,7 +9,7 @@ import {
 	testSortArray,
 	testCorrelation,
 } from "./tests.js";
-import { defaultConfig, runAutomation } from "./automation.js";
+import { automate, defaultConfig, runAutomation } from "./automation.js";
 
 const cores = 8;
 
@@ -160,8 +160,8 @@ for (const b of document.getElementsByClassName("test-automation")) {
 	const test = b.id.split("-")[0];
 
 	b.addEventListener("click", async (_) => {
-		const config = defaultConfig[test]
-		runAutomation({[test]: config});
+		const config = defaultConfig.find(c => c.name === test);
+		automate(config);
 	});
 }
 
