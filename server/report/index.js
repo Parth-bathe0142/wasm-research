@@ -131,7 +131,7 @@ function createTable(reports) {
 
 	const report = reports[0];
 	for (const [key, _] of Object.entries(report)) {
-		table += `<th>${key}</th>`;
+		table += `<th>${key.replace('_', ' ')}</th>`;
 	}
 	table += "</tr>";
 
@@ -142,8 +142,8 @@ function createTable(reports) {
 
 			if (typeof val == "number") {
 				value = parseFloat(val.toFixed(4));
-			} else {
-				value = val;
+			} else if(typeof val == "string") {
+				value = val.replace("Microsoft ", "");
 			}
 
 			table += `<td>${value}</td>`;

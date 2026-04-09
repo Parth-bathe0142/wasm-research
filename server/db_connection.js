@@ -79,7 +79,7 @@ function init() {
 
 	statements = {
 		fetchAllResults: db.prepare(`
-			select browser, test, param, native, single, multi from Results
+			select browser, test, param, native, single, multi from Results where test != 'sum'
 		`),
 
 		fetchResults: db.prepare(`

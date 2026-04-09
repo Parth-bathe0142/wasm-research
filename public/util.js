@@ -33,6 +33,18 @@ export function updateResult(test, result) {
 
 let chart = null;
 
+const whiteBackgroundPlugin = {
+	id: "whiteBackground",
+	beforeDraw: (chart) => {
+		const ctx = chart.ctx;
+		ctx.save();
+		ctx.globalCompositeOperation = "destination-over";
+		ctx.fillStyle = "#ffffff";
+		ctx.fillRect(0, 0, chart.width, chart.height);
+		ctx.restore();
+	},
+};
+
 /**
  * Plots the given test dataset with Chart.js
  * @param {string} test - name of the test (e.g. "sum", "matrix", etc.)
@@ -93,12 +105,7 @@ export function plot(test, results, canvasId = "Chart") {
 				intersect: false,
 			},
 			stacked: false,
-			plugins: {
-				title: {
-					display: true,
-					text: `Performance Comparison: ${test}`,
-				},
-			},
+			plugins: [whiteBackgroundPlugin],
 			scales: {
 				x: {
 					type: "linear",
